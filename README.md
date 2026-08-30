@@ -1,6 +1,5 @@
-# hivemind
-
-A new Flutter project.
+# Hivemind
+Flutter-powered academic community platform connecting students through Q&A, resources, AI, and reputation.
 
 ## Getting Started
 
