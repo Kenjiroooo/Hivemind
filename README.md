@@ -5,7 +5,6 @@
 ![Hivemind Banner](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 ![Riverpod](https://img.shields.io/badge/State_Management-Riverpod-blueviolet?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green.style=for-the-badge)
 
 **A modern, gamified academic community platform connecting students through Q&A, subject resources, AI-powered summaries, and peer reputation.**
 
