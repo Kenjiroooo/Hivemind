@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/buttons.dart';
 import '../../../core/widgets/question_card.dart';
 import '../../../core/widgets/resource_card.dart';
+import '../../../core/widgets/premium_background.dart';
 import '../data/community_repository.dart';
 import '../../feed/data/feed_repository.dart';
 import '../../resources/data/resource_repository.dart';
@@ -30,16 +31,18 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     final communityFuture = ref.watch(communityRepositoryProvider).getCommunityDetails(widget.communityId);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
         title: const Text('Community'),
       ),
-      body: FutureBuilder(
+      body: PremiumBackground(
+        child: FutureBuilder(
         future: communityFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -107,6 +110,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             ],
           );
         },
+      ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

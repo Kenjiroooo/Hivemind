@@ -5,6 +5,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/resource_card.dart';
 import '../../../core/widgets/buttons.dart';
+import '../../../core/widgets/premium_background.dart';
 import '../data/resource_repository.dart';
 
 class ResourceDetailScreen extends ConsumerWidget {
@@ -20,16 +21,18 @@ class ResourceDetailScreen extends ConsumerWidget {
     final resourceFuture = ref.watch(resourceRepositoryProvider).getResourceDetails(resourceId);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
         title: const Text('Resource Details'),
       ),
-      body: FutureBuilder(
+      body: PremiumBackground(
+        child: FutureBuilder(
         future: resourceFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -73,6 +76,7 @@ class ResourceDetailScreen extends ConsumerWidget {
             ),
           );
         },
+      ),
       ),
     );
   }

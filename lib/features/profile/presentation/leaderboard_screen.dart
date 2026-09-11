@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/user_avatar.dart';
+import '../../../core/widgets/premium_background.dart';
+import '../../../core/widgets/glass_card.dart';
 
 class LeaderboardScreen extends ConsumerWidget {
   const LeaderboardScreen({super.key});
@@ -20,16 +23,18 @@ class LeaderboardScreen extends ConsumerWidget {
     ];
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
         title: const Text('University Leaderboard'),
       ),
-      body: CustomScrollView(
+      body: PremiumBackground(
+        child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
@@ -62,58 +67,63 @@ class LeaderboardScreen extends ConsumerWidget {
                   final user = topUsers[index];
                   final isTopThree = index < 3;
                   
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    elevation: isTopThree ? 2 : 0,
-                    color: isTopThree ? AppColors.surfaceContainerHigh : AppColors.surface,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(
-                        color: index == 0 ? Colors.amber 
-                             : (index == 1 ? Colors.grey.shade400 
-                             : (index == 2 ? Colors.brown.shade300 
-                             : AppColors.outlineVariant)),
-                        width: isTopThree ? 2 : 1,
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: GlassCard(
+                      padding: const EdgeInsets.all(0),
+                      borderRadius: 16,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: index == 0 ? Colors.amber 
+                                 : (index == 1 ? Colors.grey.shade400 
+                                 : (index == 2 ? Colors.brown.shade300 
+                                 : Colors.transparent)),
+                            width: isTopThree ? 2 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          color: isTopThree ? AppColors.surfaceContainerHigh.withOpacity(0.5) : Colors.transparent,
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          leading: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '#${user['rank']}',
+                                style: AppTypography.headlineSm.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: isTopThree ? AppColors.primary : AppColors.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              UserAvatar(
+                                imageUrl: null,
+                                fallbackText: user['name'] as String,
+                                size: 48,
+                              ),
+                            ],
+                          ),
+                          title: Text(
+                            user['name'] as String,
+                            style: AppTypography.bodyLg.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text('Level ${user['level']} • ${user['badges']} Badges'),
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '${user['xp']}',
+                                style: AppTypography.headlineSm.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+                              ),
+                              Text('XP', style: AppTypography.labelMd),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      leading: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '#${user['rank']}',
-                            style: AppTypography.headlineSm.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: isTopThree ? AppColors.primary : AppColors.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          UserAvatar(
-                            imageUrl: null,
-                            fallbackText: user['name'] as String,
-                            size: 48,
-                          ),
-                        ],
-                      ),
-                      title: Text(
-                        user['name'] as String,
-                        style: AppTypography.bodyLg.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text('Level ${user['level']} • ${user['badges']} Badges'),
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '${user['xp']}',
-                            style: AppTypography.headlineSm.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
-                          ),
-                          Text('XP', style: AppTypography.labelMd),
-                        ],
-                      ),
-                    ),
-                  );
+                  ).animate().fadeIn(delay: (50 * index).ms, duration: 400.ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
                 },
                 childCount: topUsers.length,
               ),
@@ -121,6 +131,7 @@ class LeaderboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 }

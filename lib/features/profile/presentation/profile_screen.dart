@@ -6,6 +6,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/badge_icon.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../core/widgets/buttons.dart';
+import '../../../core/widgets/premium_background.dart';
+import '../../../core/widgets/glass_card.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../auth/application/auth_service.dart';
 
@@ -17,9 +19,10 @@ class ProfileScreen extends ConsumerWidget {
     final authState = ref.watch(authControllerProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Profile'),
         actions: [
           IconButton(
@@ -34,18 +37,19 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: authState.when(
-        data: (user) {
-          if (user == null) {
-            return const Center(child: Text('Not logged in.'));
-          }
+      body: PremiumBackground(
+        child: authState.when(
+          data: (user) {
+            if (user == null) {
+              return const Center(child: Text('Not logged in.'));
+            }
 
-          final xpProgress = user.currentXp / user.nextLevelXp;
+            final xpProgress = user.currentXp / user.nextLevelXp;
 
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                 // Glossy Header
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
@@ -102,13 +106,9 @@ class ProfileScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
 
                       // Gamification Stats
-                      Container(
+                      GlassCard(
                         padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: AppColors.outlineVariant),
-                        ),
+                        borderRadius: 24,
                         child: Column(
                           children: [
                             Row(
@@ -124,7 +124,7 @@ class ProfileScreen extends ConsumerWidget {
                               child: LinearProgressIndicator(
                                 value: xpProgress,
                                 minHeight: 12,
-                                backgroundColor: AppColors.surfaceVariant,
+                                backgroundColor: AppColors.surfaceVariant.withOpacity(0.5),
                                 color: AppColors.primary,
                               ),
                             ),
@@ -139,7 +139,7 @@ class ProfileScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
-                      ),
+                      ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
 
                       const SizedBox(height: 32),
                       
@@ -180,7 +180,7 @@ class ProfileScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('Error loading profile: $error')),
       ),
-    );
+    ));
   }
 
   Widget _buildStatColumn(String label, String value) {

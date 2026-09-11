@@ -4,6 +4,9 @@ import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import 'package:flutter_animate/flutter_animate.dart';
+import 'glass_card.dart';
+
 class ResourceCard extends StatelessWidget {
   final Resource resource;
   final VoidCallback? onTap;
@@ -29,18 +32,11 @@ class ResourceCard extends StatelessWidget {
       }
     }
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12.0),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: AppColors.outlineVariant.withValues(alpha: 0.5)),
-      ),
-      color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: GestureDetector(
         onTap: onTap,
-        child: Padding(
+        child: GlassCard(
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
@@ -110,6 +106,6 @@ class ResourceCard extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOutQuad);
   }
 }

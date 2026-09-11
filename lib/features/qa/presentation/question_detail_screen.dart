@@ -5,6 +5,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/question_card.dart';
 import '../../../core/widgets/answer_card.dart';
+import '../../../core/widgets/premium_background.dart';
 import '../application/qa_service.dart';
 import 'widgets/ai_summary_card.dart';
 
@@ -22,22 +23,24 @@ class QuestionDetailScreen extends ConsumerWidget {
     final answersState = ref.watch(questionAnswersProvider(questionId));
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
         title: const Text('Question Details'),
       ),
-      body: questionState.when(
-        data: (question) {
-          if (question == null) {
-            return const Center(child: Text('Question not found.'));
-          }
-          return CustomScrollView(
-            slivers: [
+      body: PremiumBackground(
+        child: questionState.when(
+          data: (question) {
+            if (question == null) {
+              return const Center(child: Text('Question not found.'));
+            }
+            return CustomScrollView(
+              slivers: [
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -88,6 +91,7 @@ class QuestionDetailScreen extends ConsumerWidget {
         error: (error, stack) => Center(
           child: Text('Error loading question: $error'),
         ),
+      ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {

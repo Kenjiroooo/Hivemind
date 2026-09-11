@@ -8,6 +8,8 @@ import 'vote_controls.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import 'glass_card.dart';
+
 class QuestionCard extends StatelessWidget {
   final Question question;
   final VoidCallback? onTap;
@@ -20,20 +22,11 @@ class QuestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 20.0),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: AppColors.outlineVariant.withValues(alpha: 0.6)),
-      ),
-      color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: GestureDetector(
         onTap: onTap,
-        splashColor: AppColors.primary.withValues(alpha: 0.05),
-        highlightColor: AppColors.primary.withValues(alpha: 0.02),
-        child: Padding(
+        child: GlassCard(
           padding: const EdgeInsets.all(20.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/buttons.dart';
+import '../../../core/widgets/premium_background.dart';
+import '../../../core/widgets/glass_card.dart';
 
 class AskQuestionScreen extends ConsumerStatefulWidget {
   const AskQuestionScreen({super.key});
@@ -53,9 +55,10 @@ class _AskQuestionScreenState extends ConsumerState<AskQuestionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => context.pop(),
@@ -73,59 +76,70 @@ class _AskQuestionScreenState extends ConsumerState<AskQuestionScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'What do you need help with?',
-                style: AppTypography.headlineMd,
+      body: PremiumBackground(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: GlassCard(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'What do you need help with?',
+                    style: AppTypography.headlineMd,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Be specific and imagine you\'re asking a question to another person.',
+                    style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Title Field
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Title',
+                      hintText: 'e.g. How to use Karnaugh Maps for 4 variables?',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.5),
+                    ),
+                    validator: (value) => value == null || value.isEmpty ? 'Please enter a title' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Content Field
+                  TextFormField(
+                    controller: _contentController,
+                    decoration: InputDecoration(
+                      labelText: 'Details',
+                      hintText: 'Include all the information someone would need to answer your question...',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.5),
+                    ),
+                    maxLines: 10,
+                    validator: (value) => value == null || value.isEmpty ? 'Please enter the details' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Tags Field
+                  TextFormField(
+                    controller: _tagsController,
+                    decoration: InputDecoration(
+                      labelText: 'Tags (comma separated)',
+                      hintText: 'e.g. CPE3A, Digital Logic, Homework',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.5),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Be specific and imagine you\'re asking a question to another person.',
-                style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
-              ),
-              const SizedBox(height: 24),
-              
-              // Title Field
-              TextFormField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  labelText: 'Title',
-                  hintText: 'e.g. How to use Karnaugh Maps for 4 variables?',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                validator: (value) => value == null || value.isEmpty ? 'Please enter a title' : null,
-              ),
-              const SizedBox(height: 16),
-              
-              // Content Field
-              TextFormField(
-                controller: _contentController,
-                decoration: InputDecoration(
-                  labelText: 'Details',
-                  hintText: 'Include all the information someone would need to answer your question...',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                maxLines: 10,
-                validator: (value) => value == null || value.isEmpty ? 'Please enter the details' : null,
-              ),
-              const SizedBox(height: 16),
-              
-              // Tags Field
-              TextFormField(
-                controller: _tagsController,
-                decoration: InputDecoration(
-                  labelText: 'Tags (comma separated)',
-                  hintText: 'e.g. CPE3A, Digital Logic, Homework',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

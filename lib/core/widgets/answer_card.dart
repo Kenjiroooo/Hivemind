@@ -6,6 +6,9 @@ import 'user_avatar.dart';
 import 'vote_controls.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import 'package:flutter_animate/flutter_animate.dart';
+import 'glass_card.dart';
+
 class AnswerCard extends StatelessWidget {
   final Answer answer;
 
@@ -16,21 +19,9 @@ class AnswerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16.0),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: answer.isAccepted 
-              ? Colors.green.withValues(alpha: 0.5) 
-              : AppColors.outlineVariant.withValues(alpha: 0.5),
-          width: answer.isAccepted ? 2.0 : 1.0,
-        ),
-      ),
-      color: answer.isAccepted ? Colors.green.withValues(alpha: 0.05) : AppColors.surface,
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: GlassCard(
         padding: const EdgeInsets.all(16.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,6 +86,6 @@ class AnswerCard extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOutQuad);
   }
 }
