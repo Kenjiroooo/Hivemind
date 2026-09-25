@@ -42,7 +42,7 @@ class NotificationsScreen extends ConsumerWidget {
                     borderRadius: 16,
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      tileColor: notification.isRead ? Colors.transparent : AppColors.primary.withOpacity(0.05),
+                      tileColor: notification.isRead ? Colors.transparent : AppColors.primary.withValues(alpha: 0.05),
                       leading: _buildIcon(notification.type),
                       title: Text(
                         notification.title,

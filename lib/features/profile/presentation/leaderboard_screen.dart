@@ -82,7 +82,7 @@ class LeaderboardScreen extends ConsumerWidget {
                             width: isTopThree ? 2 : 1,
                           ),
                           borderRadius: BorderRadius.circular(16),
-                          color: isTopThree ? AppColors.surfaceContainerHigh.withOpacity(0.5) : Colors.transparent,
+                          color: isTopThree ? AppColors.surfaceContainerHigh.withValues(alpha: 0.5) : Colors.transparent,
                         ),
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
