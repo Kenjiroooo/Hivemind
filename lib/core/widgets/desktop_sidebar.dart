@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 
@@ -16,6 +17,13 @@ class DesktopSidebar extends StatelessWidget {
     required this.userName,
   });
 
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning,';
+    if (hour < 17) return 'Good afternoon,';
+    return 'Good evening,';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -30,7 +38,7 @@ class DesktopSidebar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Good evening, $userName 👋',
+                  '${_getGreeting()} $userName 👋',
                   style: AppTypography.headlineSm.copyWith(
                     color: AppColors.onSurface,
                     fontWeight: FontWeight.w800,
@@ -45,7 +53,7 @@ class DesktopSidebar extends StatelessWidget {
             ),
           ),
           
-          _buildSearchBar(),
+          _buildSearchBar(context),
           const SizedBox(height: 32),
           
           Text(
@@ -59,12 +67,28 @@ class DesktopSidebar extends StatelessWidget {
           _buildNavItem(2, 'Programming', Icons.code),
           _buildNavItem(3, 'Electronics', Icons.electrical_services),
           _buildNavItem(4, 'Mathematics', Icons.calculate),
+          const SizedBox(height: 16),
+          ListTile(
+            onTap: () => context.push('/communities'),
+            leading: const Icon(Icons.groups_outlined, color: AppColors.primary),
+            title: Text(
+              'Browse Spaces',
+              style: AppTypography.labelMd.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: AppColors.primary),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            tileColor: AppColors.primaryContainer.withValues(alpha: 0.3),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(BuildContext context) {
     return Container(
       height: 48,
       decoration: BoxDecoration(
@@ -79,8 +103,16 @@ class DesktopSidebar extends StatelessWidget {
           ),
         ],
       ),
-      child: const TextField(
-        decoration: InputDecoration(
+      child: TextField(
+        onSubmitted: (query) {
+          final trimmed = query.trim();
+          if (trimmed.isNotEmpty) {
+            context.push('/search?q=${Uri.encodeComponent(trimmed)}');
+          } else {
+            context.push('/search');
+          }
+        },
+        decoration: const InputDecoration(
           hintText: 'Search questions, subjects...',
           prefixIcon: Icon(Icons.search, color: AppColors.outline),
           border: InputBorder.none,

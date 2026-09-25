@@ -2,8 +2,10 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../core/widgets/main_shell.dart';
 import '../features/auth/application/auth_service.dart';
+import '../features/auth/presentation/splash_screen.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/register_screen.dart';
+import '../features/auth/presentation/forgot_password_screen.dart';
 import '../features/feed/presentation/home_screen.dart';
 import '../features/feed/presentation/explore_screen.dart';
 import '../features/qa/presentation/question_detail_screen.dart';
@@ -11,8 +13,11 @@ import '../features/qa/presentation/ask_question_screen.dart';
 import '../features/resources/presentation/resources_screen.dart';
 import '../features/resources/presentation/resource_detail_screen.dart';
 import '../features/communities/presentation/community_screen.dart';
+import '../features/communities/presentation/communities_list_screen.dart';
+import '../features/search/presentation/search_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/profile/presentation/leaderboard_screen.dart';
+import '../features/profile/presentation/settings_screen.dart';
 import '../features/notifications/presentation/notifications_screen.dart';
 
 import 'package:flutter/material.dart';
@@ -49,20 +54,30 @@ GoRouter appRouter(Ref ref) {
   final authState = ref.watch(authControllerProvider);
 
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/splash',
     debugLogDiagnostics: true,
     redirect: (context, state) {
       final isLoading = authState.isLoading;
       if (isLoading) return null;
 
       final isAuth = authState.value != null;
-      final isLoggingIn = state.uri.path == '/login' || state.uri.path == '/register';
+      final path = state.uri.path;
+      final isPublicRoute = path == '/login' ||
+          path == '/register' ||
+          path == '/forgot-password' ||
+          path == '/splash';
 
-      if (!isAuth && !isLoggingIn) return '/login';
-      if (isAuth && isLoggingIn) return '/';
+      if (!isAuth && !isPublicRoute) return '/login';
+      if (isAuth && (path == '/login' || path == '/register' || path == '/forgot-password')) {
+        return '/';
+      }
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
@@ -70,6 +85,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) {
@@ -102,6 +121,17 @@ GoRouter appRouter(Ref ref) {
         ],
       ),
       GoRoute(
+        path: '/search',
+        pageBuilder: (context, state) {
+          final q = state.uri.queryParameters['q'];
+          return _slideTransition(context, state, SearchScreen(initialQuery: q));
+        },
+      ),
+      GoRoute(
+        path: '/communities',
+        pageBuilder: (context, state) => _slideTransition(context, state, const CommunitiesListScreen()),
+      ),
+      GoRoute(
         path: '/question/:id',
         pageBuilder: (context, state) {
           final id = state.pathParameters['id']!;
@@ -129,6 +159,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/leaderboard',
         pageBuilder: (context, state) => _slideTransition(context, state, const LeaderboardScreen()),
+      ),
+      GoRoute(
+        path: '/settings',
+        pageBuilder: (context, state) => _slideTransition(context, state, const SettingsScreen()),
       ),
     ],
   );

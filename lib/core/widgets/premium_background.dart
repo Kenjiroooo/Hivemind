@@ -16,7 +16,7 @@ class PremiumBackground extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                AppColors.primary.withOpacity(0.05),
+                AppColors.primary.withValues(alpha: 0.05),
                 AppColors.background,
               ],
               begin: Alignment.topLeft,
@@ -33,7 +33,7 @@ class PremiumBackground extends StatelessWidget {
             height: 300,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
             ),
           ).animate().fade(duration: 1000.ms).scale(curve: Curves.easeOutCubic),
         ),
@@ -45,7 +45,7 @@ class PremiumBackground extends StatelessWidget {
             height: 250,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.secondary.withOpacity(0.1),
+              color: AppColors.secondary.withValues(alpha: 0.1),
             ),
           ).animate().fade(duration: 1200.ms).scale(curve: Curves.easeOutCubic),
         ),

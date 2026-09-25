@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
+import '../../features/notifications/application/notification_count_provider.dart';
 import 'user_avatar.dart';
 
-class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
+class TopAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final bool isMobile;
   final VoidCallback? onMenuPressed;
   final VoidCallback? onSearchPressed;
@@ -23,8 +26,17 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.userName,
   });
 
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning,';
+    if (hour < 17) return 'Good afternoon,';
+    return 'Good evening,';
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
+
     if (isMobile) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -64,7 +76,7 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Good evening,',
+                          _getGreeting(),
                           style: AppTypography.bodySm.copyWith(
                             color: AppColors.onSurfaceVariant,
                           ),
@@ -80,34 +92,40 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ],
                 ),
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                Row(
+                  children: [
+                    _buildNotificationButton(context, unreadCount),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'H',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'H',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            _buildMobileSearchBar(),
+            _buildMobileSearchBar(context),
           ],
         ),
       );
@@ -165,20 +183,16 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ],
           ),
-          // Navigation items could go here, or be handled by the layout
           Row(
             children: [
               IconButton(
                 icon: const Icon(Icons.search, color: AppColors.onSurfaceVariant),
-                onPressed: onSearchPressed,
+                onPressed: onSearchPressed ?? () => context.push('/search'),
               ),
-              IconButton(
-                icon: const Icon(Icons.notifications_none, color: AppColors.onSurfaceVariant),
-                onPressed: onNotificationsPressed,
-              ),
+              _buildNotificationButton(context, unreadCount),
               const SizedBox(width: 8),
               InkWell(
-                onTap: onProfilePressed,
+                onTap: onProfilePressed ?? () => context.go('/profile'),
                 borderRadius: BorderRadius.circular(99),
                 child: Container(
                   padding: const EdgeInsets.all(2),
@@ -200,20 +214,60 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Widget _buildMobileSearchBar() {
-    return Container(
-      height: 40,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(9999),
-        border: Border.all(color: AppColors.outlineVariant),
-      ),
-      child: const TextField(
-        decoration: InputDecoration(
-          hintText: 'Search questions, subjects, resources...',
-          prefixIcon: Icon(Icons.search, color: AppColors.onSurfaceVariant),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+  Widget _buildNotificationButton(BuildContext context, int unreadCount) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.notifications_none, color: AppColors.onSurfaceVariant),
+          onPressed: onNotificationsPressed ?? () => context.push('/notifications'),
+        ),
+        if (unreadCount > 0)
+          Positioned(
+            right: 6,
+            top: 6,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: AppColors.error,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+              child: Text(
+                '$unreadCount',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildMobileSearchBar(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push('/search'),
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(9999),
+          border: Border.all(color: AppColors.outlineVariant),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            const Icon(Icons.search, color: AppColors.onSurfaceVariant, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              'Search questions, subjects, resources...',
+              style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+            ),
+          ],
         ),
       ),
     );

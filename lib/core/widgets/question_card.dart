@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../features/feed/domain/question.dart';
+import '../providers/vote_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import 'tag_chip.dart';
@@ -7,21 +10,35 @@ import 'user_avatar.dart';
 import 'vote_controls.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:timeago/timeago.dart' as timeago;
-
 import 'glass_card.dart';
 
-class QuestionCard extends StatelessWidget {
+class QuestionCard extends ConsumerWidget {
   final Question question;
   final VoidCallback? onTap;
+  final bool showFullContent;
 
   const QuestionCard({
     super.key,
     required this.question,
     this.onTap,
+    this.showFullContent = false,
   });
 
+  String _cleanSnippet(String markdown) {
+    return markdown
+        .replaceAll(RegExp(r'#+\s*'), '')
+        .replaceAll(RegExp(r'[*_~`>]'), '')
+        .replaceAll(RegExp(r'\[(.*?)\]\(.*?\)'), r'$1')
+        .replaceAll(RegExp(r'\n+'), ' ')
+        .trim();
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final voteState = ref.watch(voteProvider);
+    final direction = voteState.directionFor(question.id);
+    final adjustedScore = voteState.adjustedScore(question.id, question.upvotes);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: GestureDetector(
@@ -33,11 +50,11 @@ class QuestionCard extends StatelessWidget {
             children: [
               // Left side: Votes
               VotePillar(
-                score: question.upvotes,
-                isUpvoted: false, // TODO: Implement state
-                isDownvoted: false, // TODO: Implement state
-                onUpvote: () {},
-                onDownvote: () {},
+                score: adjustedScore,
+                isUpvoted: direction == VoteDirection.up,
+                isDownvoted: direction == VoteDirection.down,
+                onUpvote: () => ref.read(voteProvider.notifier).toggleUpvote(question.id),
+                onDownvote: () => ref.read(voteProvider.notifier).toggleDownvote(question.id),
               ),
               const SizedBox(width: 20),
               // Right side: Content
@@ -84,16 +101,38 @@ class QuestionCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // Snippet
-                    Text(
-                      question.content,
-                      style: AppTypography.bodyMd.copyWith(
-                        color: AppColors.onSurfaceVariant,
-                        height: 1.6,
+                    // Content or Snippet
+                    if (showFullContent)
+                      MarkdownBody(
+                        data: question.content,
+                        selectable: true,
+                        styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                          p: AppTypography.bodyMd.copyWith(
+                            color: AppColors.onSurfaceVariant,
+                            height: 1.6,
+                          ),
+                          code: TextStyle(
+                            backgroundColor: AppColors.surfaceContainerHigh,
+                            fontFamily: 'monospace',
+                            fontSize: 13,
+                            color: AppColors.primary,
+                          ),
+                          codeblockDecoration: BoxDecoration(
+                            color: AppColors.surfaceContainerHigh,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      )
+                    else
+                      Text(
+                        _cleanSnippet(question.content),
+                        style: AppTypography.bodyMd.copyWith(
+                          color: AppColors.onSurfaceVariant,
+                          height: 1.6,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
                     const SizedBox(height: 20),
                     // Tags and Answers
                     Row(
@@ -111,8 +150,8 @@ class QuestionCard extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: question.isResolved 
-                                ? AppColors.success.withValues(alpha: 0.1) 
+                            color: question.isResolved
+                                ? AppColors.success.withValues(alpha: 0.1)
                                 : AppColors.surfaceContainerHigh,
                             borderRadius: BorderRadius.circular(99),
                           ),

@@ -17,30 +17,40 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   Future<void> _handleRegister() async {
+    if (!_formKey.currentState!.validate()) return;
+
     await ref.read(authControllerProvider.notifier).register(
-      _emailController.text,
+      _emailController.text.trim(),
       _passwordController.text,
-      _nameController.text,
+      _nameController.text.trim(),
     );
-    
+
     // Check if there was an error in state
     final authState = ref.read(authControllerProvider);
     if (authState.hasError && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(authState.error.toString())),
+        SnackBar(
+          content: Text('Registration failed: ${authState.error}'),
+          backgroundColor: AppColors.error,
+        ),
       );
     }
   }
@@ -70,77 +80,143 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 420),
                     child: GlassCard(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Create an Account',
-                            style: AppTypography.headlineLg.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w800,
-                            ),
-                            textAlign: TextAlign.center,
-                          ).animate().fade(delay: 200.ms, duration: 600.ms).slideY(begin: 0.2, end: 0),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Join the university knowledge network.',
-                            style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
-                            textAlign: TextAlign.center,
-                          ).animate().fade(delay: 300.ms, duration: 600.ms),
-                          const SizedBox(height: 40),
-                          
-                          _buildTextField(
-                            controller: _nameController,
-                            label: 'Full Name',
-                            icon: Icons.person_outline,
-                          ).animate().fade(delay: 400.ms, duration: 600.ms).slideX(begin: -0.1, end: 0),
-                          const SizedBox(height: 16),
-
-                          _buildTextField(
-                            controller: _emailController,
-                            label: 'University Email',
-                            icon: Icons.email_outlined,
-                            keyboardType: TextInputType.emailAddress,
-                          ).animate().fade(delay: 500.ms, duration: 600.ms).slideX(begin: 0.1, end: 0),
-                          const SizedBox(height: 16),
-                          
-                          _buildTextField(
-                            controller: _passwordController,
-                            label: 'Password',
-                            icon: Icons.lock_outline,
-                            obscureText: true,
-                          ).animate().fade(delay: 600.ms, duration: 600.ms).slideX(begin: -0.1, end: 0),
-                          const SizedBox(height: 32),
-                          
-                          PrimaryButton(
-                            label: 'Sign Up',
-                            isLoading: isLoading,
-                            onPressed: _handleRegister,
-                          ).animate().fade(delay: 700.ms, duration: 600.ms).scale(),
-                          const SizedBox(height: 24),
-                          
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Already have an account?',
-                                style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Create an Account',
+                              style: AppTypography.headlineLg.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w800,
                               ),
-                              TextButton(
-                                onPressed: () => context.go('/login'),
-                                child: Text(
-                                  'Log In',
-                                  style: AppTypography.bodySm.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.bold,
+                              textAlign: TextAlign.center,
+                            ).animate().fade(delay: 200.ms, duration: 600.ms).slideY(begin: 0.2, end: 0),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Join the university knowledge network.',
+                              style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+                              textAlign: TextAlign.center,
+                            ).animate().fade(delay: 300.ms, duration: 600.ms),
+                            const SizedBox(height: 40),
+
+                            // Full Name
+                            _buildFormField(
+                              controller: _nameController,
+                              label: 'Full Name',
+                              icon: Icons.person_outline,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter your full name';
+                                }
+                                if (value.trim().length < 2) {
+                                  return 'Name must be at least 2 characters';
+                                }
+                                return null;
+                              },
+                            ).animate().fade(delay: 400.ms, duration: 600.ms).slideX(begin: -0.1, end: 0),
+                            const SizedBox(height: 16),
+
+                            // University Email
+                            _buildFormField(
+                              controller: _emailController,
+                              label: 'University Email',
+                              icon: Icons.email_outlined,
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter your email';
+                                }
+                                if (!value.contains('@') || !value.contains('.')) {
+                                  return 'Please enter a valid email address';
+                                }
+                                return null;
+                              },
+                            ).animate().fade(delay: 500.ms, duration: 600.ms).slideX(begin: 0.1, end: 0),
+                            const SizedBox(height: 16),
+
+                            // Password
+                            _buildFormField(
+                              controller: _passwordController,
+                              label: 'Password',
+                              icon: Icons.lock_outline,
+                              obscureText: _obscurePassword,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                  color: AppColors.onSurfaceVariant,
+                                ),
+                                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter a password';
+                                }
+                                if (value.length < 6) {
+                                  return 'Password must be at least 6 characters';
+                                }
+                                return null;
+                              },
+                            ).animate().fade(delay: 600.ms, duration: 600.ms).slideX(begin: -0.1, end: 0),
+                            const SizedBox(height: 16),
+
+                            // Confirm Password
+                            _buildFormField(
+                              controller: _confirmPasswordController,
+                              label: 'Confirm Password',
+                              icon: Icons.lock_outline,
+                              obscureText: _obscureConfirm,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureConfirm ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                  color: AppColors.onSurfaceVariant,
+                                ),
+                                onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please confirm your password';
+                                }
+                                if (value != _passwordController.text) {
+                                  return 'Passwords do not match';
+                                }
+                                return null;
+                              },
+                            ).animate().fade(delay: 650.ms, duration: 600.ms).slideX(begin: 0.1, end: 0),
+                            const SizedBox(height: 32),
+
+                            PrimaryButton(
+                              label: 'Sign Up',
+                              isLoading: isLoading,
+                              onPressed: _handleRegister,
+                            ).animate().fade(delay: 700.ms, duration: 600.ms).scale(),
+                            const SizedBox(height: 24),
+
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Text(
+                                  'Already have an account?',
+                                  style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+                                ),
+                                TextButton(
+                                  onPressed: () => context.go('/login'),
+                                  child: Text(
+                                    'Log In',
+                                    style: AppTypography.bodySm.copyWith(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ).animate().fade(delay: 800.ms, duration: 600.ms),
-                        ],
+                              ],
+                            ).animate().fade(delay: 800.ms, duration: 600.ms),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -153,20 +229,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildFormField({
     required TextEditingController controller,
     required String label,
     required IconData icon,
     bool obscureText = false,
     TextInputType? keyboardType,
+    Widget? suffixIcon,
+    String? Function(String?)? validator,
   }) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
+      validator: validator,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, color: AppColors.primary.withOpacity(0.6)),
+        prefixIcon: Icon(icon, color: AppColors.primary.withValues(alpha: 0.6)),
+        suffixIcon: suffixIcon,
         filled: true,
         fillColor: AppColors.surfaceContainerLow,
         border: OutlineInputBorder(
@@ -175,11 +256,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: AppColors.outlineVariant.withOpacity(0.5), width: 1),
+          borderSide: BorderSide(color: AppColors.outlineVariant.withValues(alpha: 0.5), width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.error, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       ),
