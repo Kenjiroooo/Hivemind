@@ -21,7 +21,7 @@ final class FeedRepositoryProvider
         argument: null,
         retry: null,
         name: r'feedRepositoryProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -48,4 +48,4 @@ final class FeedRepositoryProvider
   }
 }
 
-String _$feedRepositoryHash() => r'de10c5ca65cef13a8acab32180e25dbba6793db4';
+String _$feedRepositoryHash() => r'91acf41979b8f1b76298088ddcc56d0adb25abfb';

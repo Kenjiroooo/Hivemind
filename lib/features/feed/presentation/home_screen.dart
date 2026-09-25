@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/question_card.dart';
 import '../../../core/widgets/premium_background.dart';
 import '../application/feed_service.dart';
@@ -20,7 +21,16 @@ class HomeScreen extends ConsumerWidget {
         child: homeFeedState.when(
           data: (questions) {
             if (questions.isEmpty) {
-              return const Center(child: Text('No questions found.'));
+              return EmptyState(
+                icon: Icons.forum_outlined,
+                title: 'No questions yet',
+                subtitle: 'Be the first to kick off a discussion or ask about an assignment!',
+                action: ElevatedButton.icon(
+                  onPressed: () => context.push('/ask'),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Ask a Question'),
+                ),
+              );
             }
             return RefreshIndicator(
               onRefresh: () => ref.read(homeFeedProvider.notifier).refresh(),

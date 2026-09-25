@@ -7,28 +7,11 @@ abstract class ResourceRepository {
   Future<List<Resource>> getRecentResources();
   Future<List<Resource>> getResourcesByCommunity(String communityId);
   Future<Resource?> getResourceDetails(String resourceId);
+  Future<void> addResource(Resource resource);
 }
 
 class MockResourceRepository implements ResourceRepository {
-  @override
-  Future<List<Resource>> getRecentResources() async {
-    await Future.delayed(const Duration(seconds: 1));
-    return _mockResources;
-  }
-
-  @override
-  Future<List<Resource>> getResourcesByCommunity(String communityId) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return _mockResources.where((r) => r.communityId == communityId).toList();
-  }
-
-  @override
-  Future<Resource?> getResourceDetails(String resourceId) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return _mockResources.where((r) => r.id == resourceId).firstOrNull;
-  }
-
-  final _mockResources = [
+  final List<Resource> _mockResources = [
     Resource(
       id: 'r1',
       title: 'Digital Logic Midterm Review Notes.pdf',
@@ -53,13 +36,52 @@ class MockResourceRepository implements ResourceRepository {
       communityName: 'Electronics Community',
       uploadedAt: DateTime.now().subtract(const Duration(days: 5)),
       url: 'https://example.com/guide',
+      sizeBytes: 120000,
       downloads: 89,
       upvotes: 21,
     ),
+    Resource(
+      id: 'r3',
+      title: 'Linear Algebra Cheat Sheet & Formulae',
+      type: 'PDF',
+      uploaderId: 'u8',
+      uploaderName: 'Elena Rostova',
+      communityId: 'c3',
+      communityName: 'Mathematics Club',
+      uploadedAt: DateTime.now().subtract(const Duration(days: 1)),
+      url: 'https://example.com/linear_algebra.pdf',
+      sizeBytes: 1540000,
+      downloads: 210,
+      upvotes: 67,
+    ),
   ];
+
+  @override
+  Future<List<Resource>> getRecentResources() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    return List.unmodifiable(_mockResources);
+  }
+
+  @override
+  Future<List<Resource>> getResourcesByCommunity(String communityId) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return List.unmodifiable(_mockResources.where((r) => r.communityId == communityId).toList());
+  }
+
+  @override
+  Future<Resource?> getResourceDetails(String resourceId) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return _mockResources.where((r) => r.id == resourceId).firstOrNull;
+  }
+
+  @override
+  Future<void> addResource(Resource resource) async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    _mockResources.insert(0, resource);
+  }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 ResourceRepository resourceRepository(Ref ref) {
   return MockResourceRepository();
 }
@@ -67,4 +89,14 @@ ResourceRepository resourceRepository(Ref ref) {
 @riverpod
 Future<List<Resource>> recentResources(Ref ref) {
   return ref.watch(resourceRepositoryProvider).getRecentResources();
+}
+
+@riverpod
+Future<Resource?> resourceDetail(Ref ref, String resourceId) {
+  return ref.watch(resourceRepositoryProvider).getResourceDetails(resourceId);
+}
+
+@riverpod
+Future<List<Resource>> resourcesByCommunity(Ref ref, String communityId) {
+  return ref.watch(resourceRepositoryProvider).getResourcesByCommunity(communityId);
 }

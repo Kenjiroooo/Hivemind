@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/resource_card.dart';
 import '../../../core/widgets/premium_background.dart';
 import '../data/resource_repository.dart';
+import 'upload_resource_dialog.dart';
 
 class ResourcesScreen extends ConsumerWidget {
   const ResourcesScreen({super.key});
@@ -19,7 +21,27 @@ class ResourcesScreen extends ConsumerWidget {
         child: recentResourcesState.when(
           data: (resources) {
             if (resources.isEmpty) {
-              return const Center(child: Text('No resources found.'));
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.folder_open_outlined, size: 64, color: AppColors.onSurfaceVariant.withValues(alpha: 0.5)),
+                    const SizedBox(height: 16),
+                    Text('No resources found.', style: AppTypography.headlineSm),
+                    const SizedBox(height: 8),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => const UploadResourceDialog(),
+                        );
+                      },
+                      icon: const Icon(Icons.upload),
+                      label: const Text('Upload First Resource'),
+                    ),
+                  ],
+                ),
+              );
             }
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
@@ -47,7 +69,10 @@ class ResourcesScreen extends ConsumerWidget {
                         ),
                         ElevatedButton.icon(
                           onPressed: () {
-                            // TODO: Upload Resource Action
+                            showDialog(
+                              context: context,
+                              builder: (_) => const UploadResourceDialog(),
+                            );
                           },
                           icon: const Icon(Icons.upload),
                           label: const Text('Upload'),
@@ -63,9 +88,7 @@ class ResourcesScreen extends ConsumerWidget {
                 final resource = resources[index - 1];
                 return ResourceCard(
                   resource: resource,
-                  onTap: () {
-                    // TODO: Navigate to resource detail
-                  },
+                  onTap: () => context.push('/resource/${resource.id}'),
                 );
               },
             );
