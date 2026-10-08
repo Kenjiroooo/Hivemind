@@ -19,6 +19,7 @@ import '../features/profile/presentation/profile_screen.dart';
 import '../features/profile/presentation/leaderboard_screen.dart';
 import '../features/profile/presentation/settings_screen.dart';
 import '../features/notifications/presentation/notifications_screen.dart';
+import '../features/rewards/presentation/rewards_screen.dart';
 
 import 'package:flutter/material.dart';
 
@@ -163,6 +164,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/settings',
         pageBuilder: (context, state) => _slideTransition(context, state, const SettingsScreen()),
+      ),
+      GoRoute(
+        path: '/rewards',
+        pageBuilder: (context, state) => _slideTransition(context, state, const RewardsScreen()),
       ),
     ],
   );
