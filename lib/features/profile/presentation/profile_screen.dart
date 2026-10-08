@@ -166,6 +166,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 children: [
                                   _buildStatColumn('Reputation', user.reputation.toString()),
+                                  _buildStatColumn('Tokens', user.tokenBalance.toString()),
                                   _buildStatColumn('Rank', '#${user.rank}'),
                                   _buildStatColumn('Badges', user.badges.length.toString()),
                                 ],
