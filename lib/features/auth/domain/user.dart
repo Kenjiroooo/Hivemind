@@ -16,6 +16,8 @@ abstract class AppUser with _$AppUser {
     @Default(100) int nextLevelXp,
     @Default(0) int rank,
     @Default([]) List<String> badges,
+    @Default(0) int tokenBalance,
+    @Default(0) int lifetimeTokens,
     @Default('student') String role,
     @Default('Undeclared') String major,
     @Default(1) int year,
