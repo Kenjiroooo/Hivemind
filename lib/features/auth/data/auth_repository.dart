@@ -9,6 +9,7 @@ abstract class AuthRepository {
   Future<AppUser> register(String email, String password, String displayName);
   Future<void> signOut();
   Stream<AppUser?> authStateChanges();
+  Future<void> updateUser(AppUser user);
 }
 
 class MockAuthRepository implements AuthRepository {
@@ -56,6 +57,13 @@ class MockAuthRepository implements AuthRepository {
   Future<void> signOut() async {
     await Future.delayed(const Duration(milliseconds: 500));
     _currentUser = null;
+  }
+
+  @override
+  Future<void> updateUser(AppUser user) async {
+    _currentUser = user;
+    // In a real implementation we would stream the change, 
+    // but the mock just updates the local variable.
   }
 }
 
