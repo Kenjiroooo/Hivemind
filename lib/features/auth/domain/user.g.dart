@@ -19,6 +19,8 @@ _AppUser _$AppUserFromJson(Map<String, dynamic> json) => _AppUser(
   badges:
       (json['badges'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const [],
+  tokenBalance: (json['tokenBalance'] as num?)?.toInt() ?? 0,
+  lifetimeTokens: (json['lifetimeTokens'] as num?)?.toInt() ?? 0,
   role: json['role'] as String? ?? 'student',
   major: json['major'] as String? ?? 'Undeclared',
   year: (json['year'] as num?)?.toInt() ?? 1,
@@ -35,6 +37,8 @@ Map<String, dynamic> _$AppUserToJson(_AppUser instance) => <String, dynamic>{
   'nextLevelXp': instance.nextLevelXp,
   'rank': instance.rank,
   'badges': instance.badges,
+  'tokenBalance': instance.tokenBalance,
+  'lifetimeTokens': instance.lifetimeTokens,
   'role': instance.role,
   'major': instance.major,
   'year': instance.year,
