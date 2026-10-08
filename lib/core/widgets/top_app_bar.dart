@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../../features/notifications/application/notification_count_provider.dart';
+import '../../features/auth/application/auth_service.dart';
 import 'user_avatar.dart';
 
 class TopAppBar extends ConsumerWidget implements PreferredSizeWidget {
@@ -94,6 +95,8 @@ class TopAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 ),
                 Row(
                   children: [
+                    _buildTokenChip(ref),
+                    const SizedBox(width: 8),
                     _buildNotificationButton(context, unreadCount),
                     const SizedBox(width: 8),
                     Container(
@@ -189,6 +192,9 @@ class TopAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 icon: const Icon(Icons.search, color: AppColors.onSurfaceVariant),
                 onPressed: onSearchPressed ?? () => context.push('/search'),
               ),
+              const SizedBox(width: 8),
+              _buildTokenChip(ref),
+              const SizedBox(width: 8),
               _buildNotificationButton(context, unreadCount),
               const SizedBox(width: 8),
               InkWell(
@@ -247,6 +253,38 @@ class TopAppBar extends ConsumerWidget implements PreferredSizeWidget {
       ],
     );
   }
+
+  Widget _buildTokenChip(WidgetRef ref) {
+    // Watch token provider, or auth provider directly
+    final tokenBalance = ref.watch(authControllerProvider).valueOrNull?.tokenBalance ?? 0;
+    return Builder(
+      builder: (context) => GestureDetector(
+        onTap: () => context.push('/rewards'),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppColors.tertiaryContainer,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.stars, color: AppColors.tertiary, size: 16),
+              const SizedBox(width: 4),
+              Text(
+                '$tokenBalance',
+                style: AppTypography.labelMd.copyWith(
+                  color: AppColors.onTertiaryContainer,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 
   Widget _buildMobileSearchBar(BuildContext context) {
     return GestureDetector(
