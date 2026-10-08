@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../features/qa/domain/answer.dart';
 import '../providers/vote_provider.dart';
+import '../providers/token_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import 'user_avatar.dart';
@@ -43,7 +44,26 @@ class AnswerCard extends ConsumerWidget {
                   score: adjustedScore,
                   isUpvoted: direction == VoteDirection.up,
                   isDownvoted: direction == VoteDirection.down,
-                  onUpvote: () => ref.read(voteProvider.notifier).toggleUpvote(answer.id),
+                  onUpvote: () {
+                    final notifier = ref.read(voteProvider.notifier);
+                    final currentDirection = voteState.directionFor(answer.id);
+                    notifier.toggleUpvote(answer.id);
+                    
+                    if (currentDirection != VoteDirection.up) {
+                      ref.read(tokenControllerProvider.notifier).addTokens(2, reason: 'Answer upvoted');
+                      ScaffoldMessenger.of(context).clearSnackBars();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('✨ +2 Tokens awarded for a helpful answer!'),
+                          backgroundColor: AppColors.primary,
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    } else {
+                      ref.read(tokenControllerProvider.notifier).deductTokens(2, reason: 'Upvote removed');
+                    }
+                  },
                   onDownvote: () => ref.read(voteProvider.notifier).toggleDownvote(answer.id),
                 ),
                 if (answer.isAccepted && !isQuestionAuthor)

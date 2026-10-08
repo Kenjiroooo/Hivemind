@@ -10,6 +10,7 @@ import '../../auth/application/auth_service.dart';
 import '../data/qa_repository.dart';
 import '../application/qa_service.dart';
 import '../application/ai_summary_provider.dart';
+import '../../../core/providers/token_provider.dart';
 import 'widgets/ai_summary_card.dart';
 import 'widgets/answer_bottom_sheet.dart';
 
@@ -153,9 +154,25 @@ class QuestionDetailScreen extends ConsumerWidget {
                             answer: answers[index],
                             isQuestionAuthor: isAuthor,
                             onAccept: () async {
+                              final answer = answers[index];
+                              
                               await ref
                                   .read(qaRepositoryProvider)
-                                  .acceptAnswer(questionId, answers[index].id);
+                                  .acceptAnswer(questionId, answer.id);
+                              
+                              if (!answer.isAccepted) {
+                                ref.read(tokenControllerProvider.notifier).addTokens(50, reason: 'Best Answer');
+                                ScaffoldMessenger.of(context).clearSnackBars();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('🎉 +50 Tokens awarded to the author for the Best Answer!'),
+                                    backgroundColor: AppColors.primary,
+                                    behavior: SnackBarBehavior.floating,
+                                    duration: const Duration(seconds: 4),
+                                  ),
+                                );
+                              }
+
                               ref.invalidate(questionAnswersProvider(questionId));
                               ref.invalidate(questionDetailProvider(questionId));
                             },
