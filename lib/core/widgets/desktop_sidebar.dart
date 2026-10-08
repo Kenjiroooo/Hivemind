@@ -9,12 +9,14 @@ class DesktopSidebar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTabSelected;
   final String userName;
+  final int tokenBalance;
 
   const DesktopSidebar({
     super.key,
     required this.currentIndex,
     required this.onTabSelected,
     required this.userName,
+    this.tokenBalance = 0,
   });
 
   String _getGreeting() {
@@ -48,6 +50,31 @@ class DesktopSidebar extends StatelessWidget {
                 Text(
                   'What are you learning today?',
                   style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+                ),
+                const SizedBox(height: 12),
+                GestureDetector(
+                  onTap: () => context.push('/rewards'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.tertiaryContainer,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.stars, color: AppColors.tertiary, size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          '$tokenBalance Tokens',
+                          style: AppTypography.labelMd.copyWith(
+                            color: AppColors.onTertiaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),

@@ -111,6 +111,7 @@ class MainShell extends ConsumerWidget {
                 currentIndex: _calculateSidebarIndex(location),
                 onTabSelected: (index) => _onSidebarSelected(context, index),
                 userName: userName ?? 'Guest',
+                tokenBalance: ref.watch(authControllerProvider).valueOrNull?.tokenBalance ?? 0,
               ),
               Expanded(
                 child: child,
